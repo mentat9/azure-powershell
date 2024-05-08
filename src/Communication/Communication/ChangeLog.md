@@ -18,6 +18,13 @@
         - Additional information about change #1
 -->
 ## Upcoming Release
+* Update the synopsis
+
+## Version 0.3.1
+* Introduced secrets detection feature to safeguard sensitive data.
+
+## Version 0.3.0
+* First preview release for module Az.EmailService
 
 ## Version 0.2.0
 * Added a new cmdlet `Test-AzCommunicationServiceNameAvailability`

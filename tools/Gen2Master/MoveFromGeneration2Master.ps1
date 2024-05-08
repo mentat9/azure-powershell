@@ -71,6 +71,7 @@ Function Move-Generation2Master {
             $Psd1Metadata = Import-LocalizedData -BaseDirectory "$DestPath/$ModuleName$Psd1FolderPostfix" -FileName "Az.$ModuleName.psd1"
         }
         else {
+            Copy-Template -SourceName Module.psd1 -DestPath $DestPath\$ModuleName -DestName "Az.$ModuleName.psd1" -ModuleName $ModuleName
             $Psd1Metadata = Import-LocalizedData -BaseDirectory "$PSScriptRoot/Templates" -FileName "Module.psd1"
         }
         foreach ($submoduleDir in $submoduleDirs) {
@@ -88,6 +89,10 @@ Function Move-Generation2Master {
                     Copy-Item -Recurse -Path $SourceItem -Destination $DestItem
                 }
             }
+            $sourceHelpFolder = Join-Path -Path (Join-Path -Path $SourcePath -ChildPath $submoduleDir.Name) -ChildPath "docs"
+            $destHelpHolder = Join-Path -Path (Join-Path -Path $DestPath -ChildPath $ModuleName) -ChildPath "help"
+            Write-Host "Copying help files from $sourceHelpFolder to $destHelpHolder" -ForegroundColor Yellow
+            Get-ChildItem -Path $sourceHelpFolder -Filter *.md | Copy-Item -Destination $destHelpHolder
             #Region Clean Local Modules
             $LocalModulesPath = Join-Path -Path (Join-Path -Path (Join-Path -Path $DestPath -ChildPath $submoduleDir.Name) -ChildPath 'generated') -ChildPath 'modules'
             If (Test-Path $LocalModulesPath) {
@@ -130,6 +135,7 @@ Function Move-Generation2Master {
                 }
                 $Psd1Metadata.Remove("PrivateData")
             }
+            
             # Generate csproj file and add the dependency in the solution file
             Copy-Template -SourceName Az.ModuleName.csproj -DestPath (Join-Path $DestPath $submoduleDir.Name) -DestName "Az.$submoduleName.csproj" -RootModuleName $ModuleName -ModuleName $submoduleName -ModuleFolder $submoduleDir.Name
         }
@@ -176,6 +182,7 @@ Function Move-Generation2Master {
                 $psd1Data.RequiredAssemblies = $psd1Data.RequiredAssemblies | Where-Object { $_ -ne $assemblyToRemove }
                 Update-ModuleManifest -Path $psd1Path -RequiredAssemblies $psd1Data.RequiredAssemblies
             }
+
             Import-Module $psd1Path
             Import-Module platyPS
             $HelpFolder = "$DestPath\$ModuleName$Psd1FolderPostfix\help"
@@ -195,7 +202,6 @@ Function Move-Generation2Master {
                         Remove-Item $ExposedHelpFile.FullName
                     }
                 }
-                Write-Host "$ScriptRoot/../ResolveTools/Resolve-Psd1.ps1"
                 & "$ScriptRoot/../ResolveTools/Resolve-Psd1.ps1" -ModuleName $ModuleName -ArtifactFolder "$DestPath\..\..\artifacts" -Psd1Folder "$DestPath/$ModuleName$Psd1FolderPostfix"
             }
             else

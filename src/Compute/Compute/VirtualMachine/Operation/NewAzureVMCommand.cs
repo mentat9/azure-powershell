@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,6 +59,7 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Azure.Commands.Compute
 {
+    [GenericBreakingChangeWithVersionAttribute("Starting in May 2024 the \"New-AzVM\" cmdlet will deploy with the image 'Windows Server 2022 Azure Edition' by default. This will make migrating to Trusted Launch easier in the future. To know more about Trusted Launch, please visit https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch", "12.0.0", "8.0.0")]
     [Cmdlet("New", ResourceManager.Common.AzureRMConstants.AzureRMPrefix + "VM", SupportsShouldProcess = true, DefaultParameterSetName = "SimpleParameterSet")]
     [OutputType(typeof(PSAzureOperationResponse), typeof(PSVirtualMachine))]
     public class NewAzureVMCommand : VirtualMachineBaseCmdlet
@@ -221,6 +222,7 @@ namespace Microsoft.Azure.Commands.Compute
             "FlatcarLinuxFreeGen2",
             "Win2022Datacenter",
             "Win2022AzureEditionCore",
+            "Win2022AzureEdition",
             "Win2019Datacenter",
             "Win2016Datacenter",
             "Win2012R2Datacenter",
@@ -439,6 +441,18 @@ namespace Microsoft.Azure.Commands.Compute
            ValueFromPipelineByPropertyName = true,
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "used to make a request conditional for the PUT and other non-safe methods. The server will only return the requested resources if the resource matches one of the listed ETag values. Omit this value to always overwrite the current resource. Specify the last-seen ETag value to prevent accidentally overwriting concurrent changes.")]
+        public string IfMatch { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will result in error from server as they are not supported.")]
+        public string IfNoneMatch { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -699,10 +713,12 @@ namespace Microsoft.Azure.Commands.Compute
                         sharedGalleryImageId: _cmdlet.SharedGalleryImageId,
                         securityType: _cmdlet.SecurityType,
                         enableVtpm: _cmdlet.EnableVtpm,
-                        enableSecureBoot: _cmdlet.EnableSecureBoot
+                        enableSecureBoot: _cmdlet.EnableSecureBoot,
+                        ifMatch: _cmdlet.IfMatch,
+                        ifNoneMatch: _cmdlet.IfNoneMatch
                         );
                 }
-                else
+                else  // does not get used. DiskFile parameter set is not supported.
                 {
                     var disk = resourceGroup.CreateManagedDiskConfig(
                         name: _cmdlet.Name,
@@ -1128,7 +1144,7 @@ namespace Microsoft.Azure.Commands.Compute
                         result = this.VirtualMachineClient.CreateOrUpdateWithHttpMessagesAsync(
                         this.ResourceGroupName,
                         this.VM.Name,
-                        parameters,null,null,
+                        parameters,this.IfMatch,this.IfNoneMatch,
                         auxAuthHeader).GetAwaiter().GetResult();
                     }
                     catch (Exception ex)

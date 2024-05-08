@@ -28,7 +28,8 @@ New-AzVM [[-ResourceGroupName] <String>] [[-Location] <String>] [-EdgeZone <Stri
  [-UserData <String>] [-ImageReferenceId <String>] [-PlatformFaultDomain <Int32>] [-HibernationEnabled]
  [-vCPUCountAvailable <Int32>] [-vCPUCountPerCore <Int32>] [-DiskControllerType <String>]
  [-SharedGalleryImageId <String>] [-SecurityType <String>] [-EnableVtpm <Boolean>]
- [-EnableSecureBoot <Boolean>] [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm]
+ [-EnableSecureBoot <Boolean>] [-IfMatch <String>] [-IfNoneMatch <String>]
+ [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
 
@@ -37,8 +38,9 @@ New-AzVM [[-ResourceGroupName] <String>] [[-Location] <String>] [-EdgeZone <Stri
 New-AzVM [-ResourceGroupName] <String> [-Location] <String> [-EdgeZone <String>] [-VM] <PSVirtualMachine>
  [[-Zone] <String[]>] [-DisableBginfoExtension] [-Tag <Hashtable>] [-LicenseType <String>] [-AsJob]
  [-OSDiskDeleteOption <String>] [-DataDiskDeleteOption <String>] [-SshKeyName <String>] [-GenerateSshKey]
- [-vCPUCountAvailable <Int32>] [-vCPUCountPerCore <Int32>]
- [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-vCPUCountAvailable <Int32>] [-vCPUCountPerCore <Int32>] [-IfMatch <String>] [-IfNoneMatch <String>]
+ [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### DiskFileParameterSet
@@ -54,7 +56,7 @@ New-AzVM [[-ResourceGroupName] <String>] [[-Location] <String>] [-EdgeZone <Stri
  [-Priority <String>] [-EvictionPolicy <String>] [-MaxPrice <Double>] [-EncryptionAtHost]
  [-HostGroupId <String>] [-CapacityReservationGroupId <String>] [-UserData <String>]
  [-PlatformFaultDomain <Int32>] [-HibernationEnabled] [-vCPUCountAvailable <Int32>] [-vCPUCountPerCore <Int32>]
- [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-IfMatch <String>] [-IfNoneMatch <String>] [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -309,6 +311,7 @@ $vm1 = Get-AzVM -ResourceGroupName $rgname -Name $vmname1;
 #$vm1.SecurityProfile.UefiSettings.VTpmEnabled $true;
 #$vm1.SecurityProfile.UefiSettings.SecureBootEnabled $true;
 ```
+
 This example Creates a new VM with the TrustedLaunch Security Type and sets flags EnableSecureBoot and EnableVtpm as True by default. A Trusted Launch VM requires a Gen2 image. Please check [the Trusted Launch feature page](https://aka.ms/trustedlaunch) for more information.
 
 ### Example 9: Create a VM with Trusted Launch turned on by defualt using New-AzVMConfig.
@@ -349,8 +352,9 @@ New-AzVM -ResourceGroupName $rgname -Location $loc -VM $vmConfig;
 $vm = Get-AzVM -ResourceGroupName $rgname -Name $vmname;
 # Verify $vm.SecurityProfile.SecurityType is TrustedLaunch
 # Verify $vm.SecurityProfile.UefiSettings.SecureBootEnabled is true.
-# Verify $vm.SecurityProfile.UefiSettings.VTpmEnabled is true. 
+# Verify $vm.SecurityProfile.UefiSettings.VTpmEnabled is true.
 ```
+
 This example shows how to create a VM with a valid Gen2 image, allowing the VM to default to TrustedLaunch which requires Gen2 images. Please check [the Trusted Launch feature page](https://aka.ms/trustedlaunch) for more information.
 
 ### Example 10: Creates a VM with TrustedLaunch turned on by default.
@@ -369,6 +373,7 @@ $vm = Get-AzVM -ResourceGroupName $rgname -Name $vmname;
 # Verify $vm.SecurityProfile.SecurityType is TrustedLaunch.
 # Verify the $vm.StorageProfile.ImageReference.Sku has defaulted to "2022-datacenter-azure-edition", a Gen2 image.
 ```
+
 This example shows how the simple cmdlet call with minimal parameters will result in a TrustedLaunch enabled VM with a Gen2 image. Please check [the Trusted Launch feature page](https://aka.ms/trustedlaunch) for more information.
 
 =======
@@ -731,6 +736,36 @@ Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -IfMatch
+used to make a request conditional for the PUT and other non-safe methods. The server will only return the requested resources if the resource matches one of the listed ETag values. Omit this value to always overwrite the current resource. Specify the last-seen ETag value to prevent accidentally overwriting concurrent changes.
+
+```yaml
+Type: System.String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -IfNoneMatch
+Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will result in error from server as they are not supported.
+
+```yaml
+Type: System.String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
@@ -1361,5 +1396,3 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 [Set-AzVMSourceImage](./Set-AzVMSourceImage.md)
 
 [Set-AzVMOSDisk](./Set-AzVMOSDisk.md)
-
-
